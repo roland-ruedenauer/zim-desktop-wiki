@@ -39,6 +39,10 @@ from .command import Command, GtkCommand, UsageError, GetoptError
 from .ipc import dispatch as _ipc_dispatch
 from .ipc import start_listening as _ipc_start_listening
 
+from gi.repository import Gio
+from gi.repository import GLib
+from gi.repository import Gtk
+
 
 class HelpCommand(Command):
 	'''Class implementing the C{--help} command'''
@@ -604,7 +608,7 @@ def build_command(args, pwd=None):
 
 
 
-class ZimApplication(object):
+class ZimApplication(Gtk.Application):
 	'''This object is repsonsible for managing the life cycle of the
 	application process.
 
@@ -616,6 +620,8 @@ class ZimApplication(object):
 	'''
 
 	def __init__(self):
+		super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE)
+		GLib.set_application_name("Zim Desktop Wiki")
 		self._running = False
 		self._log_started = False
 		self._standalone = False
@@ -664,6 +670,16 @@ class ZimApplication(object):
 			self._windows.remove(window)
 		except KeyError:
 			pass
+
+	def _check_custom_styling(self):
+		"""Check if the configuration manager is able to find a file 'style.css' containing custom Gtk style configuration"""
+		from gi.repository import Gdk
+		css_file, _ = ConfigManager._get_file("style.css")
+		if css_file.exists():
+			logger.info("adding CSS provider with content from %s", css_file.path)
+			cssProvider = Gtk.CssProvider()
+			cssProvider.load_from_path(css_file.path)
+			Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
 	def _on_destroy_window(self, window):
 		self.remove_window(window)
@@ -746,6 +762,8 @@ class ZimApplication(object):
 
 		zim.errors.set_use_gtk(True)
 		self._setup_signal_handling()
+
+		self._check_custom_styling()
 
 		if self._standalone:
 			logger.debug('Starting standalone process')

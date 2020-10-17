@@ -1,0 +1,7 @@
+#zim-pageindex {
+    background-color: #f4f4f4;
+}
+#zim-pageindex:selected {
+    background-color: red;
+}
+
