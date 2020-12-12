@@ -2112,6 +2112,22 @@ Foo 123
 		newtree = buffer.get_parsetree()
 		self.assertEqual(newtree.tostring(), tree.tostring())
 
+	def testUnkownObjectTypeWithoutData(self):
+		view = TextView(self.preferences)
+		notebook = self.setUpNotebook()
+		page = notebook.get_page(Path('Test'))
+		buffer = TextBuffer(notebook, page)
+		view.set_buffer(buffer)
+		tree = new_parsetree_from_text(self, '''\
+======= Test
+
+{{{somenewtype: foo=123
+}}}
+
+''')
+		buffer.set_parsetree(tree)
+		self.assertEqual(len(list(view._object_widgets)), 1) # assert there is an object in the view
+
 	def testPopup(self):
 		notebook = self.setUpNotebook()
 		page = notebook.get_page(Path('Test'))

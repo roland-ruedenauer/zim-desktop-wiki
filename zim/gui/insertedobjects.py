@@ -294,7 +294,7 @@ class UnkownObjectBuffer(Gtk.TextBuffer):
 	def __init__(self, attrib, data):
 		Gtk.TextBuffer.__init__(self)
 		self.object_attrib = attrib
-		self.set_text(data)
+		self.set_text(data or '')
 
 	def get_object_data(self):
 		attrib = self.object_attrib.copy()
